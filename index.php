@@ -1,28 +1,29 @@
 <?php
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Allow-Headers: Content-Type");
+header("Access-Control-Allow-Methods: POST");
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    
     $email = filter_var($_POST["email"], FILTER_SANITIZE_EMAIL);
     $message = htmlspecialchars($_POST["message"]);
 
-    if (!$email || !$message) {
-        echo json_encode(["success" => false, "error" => "Email y mensaje son requeridos"]);
-        exit;
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        echo json_encode(["success" => false, "error" => "Email inválido"]);
+        exit();
     }
 
     $to = "florenciamorelliIT@gmail.com";
-    $subject = "Nuevo mensaje desde tu portfolio";
-    $headers = "From: $email\r\nReply-To: $email\r\nContent-Type: text/html; charset=UTF-8";
-
-    $body = "<p><strong>Email:</strong> $email</p><p><strong>Mensaje:</strong> $message</p>";
+    $subject = "Nuevo mensaje de contacto";
+    $headers = "From: " . $email . "\r\n" . "Reply-To: " . $email . "\r\n" . "Content-Type: text/plain; charset=UTF-8";
+    $body = "Has recibido un mensaje de $email:\n\n$message";
 
     if (mail($to, $subject, $body, $headers)) {
-        echo json_encode(["success" => true]);
+        echo json_encode(["success" => true, "message" => "Correo enviado"]);
     } else {
         echo json_encode(["success" => false, "error" => "Error al enviar el correo"]);
     }
+
 } else {
     echo json_encode(["success" => false, "error" => "Método no permitido"]);
 }
